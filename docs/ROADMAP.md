@@ -1,6 +1,6 @@
 # Roadmap (living document — source of truth for milestone status)
 
-Last updated: 2026-08-01 (session: Milestone 0 delivery).
+Last updated: 2026-08-01 (session: Milestone 1 delivery).
 
 ## Decision log
 
@@ -12,6 +12,7 @@ Last updated: 2026-08-01 (session: Milestone 0 delivery).
 | 2026-08-01 | Turn model: plan-then-resolve with interactive interrupts | ADR-004 (user-approved) |
 | 2026-08-01 | Save storage: SQLite hybrid | ADR-002 (delegated per spec §31) |
 | 2026-08-01 | Repository: GitHub; pull at session start, zip/patch handoff back | this file |
+| 2026-08-01 | Repository URL: https://github.com/Chxerxerx/polsim | this file |
 
 ## Open items (non-blocking)
 
@@ -26,8 +27,8 @@ Linux-tested, docs + this roadmap updated, no known critical defects).
 
 | Milestone | Scope (specification §34) | Status |
 |---|---|---|
-| M0 | Architecture & technical decisions: design docs, ADRs, data model, determinism/performance/testing strategies, package scaffold, CI, this roadmap | **Delivered for review** — becomes complete when pushed as the repo's initial commit and CI is green |
-| M1 | Core foundation: weekly clock, deterministic RNG streams, entity IDs, game/scenario config, seed generation, basic save/load, logging, test + profiling infrastructure, replay harness | Not started |
+| M0 | Architecture & technical decisions: design docs, ADRs, data model, determinism/performance/testing strategies, package scaffold, CI, this roadmap | **Complete** (2026-08-01). Note: the initial GitHub web upload dropped hidden files (.gitignore, CI workflow) and added __pycache__; repaired in a housekeeping commit. CI activates on the first `git push`. |
+| M1 | Core foundation: weekly clock, deterministic RNG streams, entity IDs, game/scenario config, seed generation, basic save/load, logging, test + profiling infrastructure, replay harness | **Delivered for review** (2026-08-01): all M1 systems implemented; 61 tests passing incl. replay harness (same-seed and save/load-mid-run hash equality) and save round-trips; randomness guard test active; ruff + mypy --strict clean; verified on Linux/CPython 3.14.4. M1 baselines (sandbox hardware): advance_week ~1 µs, state_hash ~70 µs, save ~5.5 ms, load ~0.5 ms. Complete when pushed and CI is green. |
 | M2 | Geography & population: country/provinces/districts/towns, generation, SoA store, weights, demographics, aggregates, event-driven updates. **Hard gate: 250k storage/update/save/load within budget** | Not started |
 | M2.5 | UI walking skeleton (post-ADR-001): PySide6 shell, worker-thread boundary, map spike, one live view-model | Not started |
 | M3 | Ideology, parties, factions, organizations | Not started |
