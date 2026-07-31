@@ -1,0 +1,44 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "polsim"
+version = "0.0.1"
+description = "Political simulation and grand-strategy game (working title)"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "numpy>=2.5",
+    "zstandard>=0.23",
+]
+
+[project.optional-dependencies]
+ui = ["PySide6>=6.11"]
+dev = [
+    "ruff>=0.8",
+    "mypy>=1.14",
+    "pytest>=8.3",
+    "hypothesis>=6.120",
+    "pytest-benchmark>=5.1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/polsim"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+files = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
