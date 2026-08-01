@@ -21,7 +21,7 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
-from polsim.people.columns import COLUMN_DTYPES
+from polsim.people.columns import column_dtypes
 
 Array = NDArray[Any]
 
@@ -32,7 +32,7 @@ class PopulationStore:
     def __init__(
         self, columns: dict[str, Array], district_ranges: dict[int, tuple[int, int]]
     ) -> None:
-        expected = set(COLUMN_DTYPES)
+        expected = set(column_dtypes())
         if set(columns) != expected:
             missing = sorted(expected - set(columns))
             extra = sorted(set(columns) - expected)
@@ -40,8 +40,9 @@ class PopulationStore:
         counts = {len(array) for array in columns.values()}
         if len(counts) != 1:
             raise ValueError(f"inconsistent column lengths: {sorted(counts)}")
+        dtypes = column_dtypes()
         self._columns = {
-            name: np.ascontiguousarray(array, dtype=COLUMN_DTYPES[name])
+            name: np.ascontiguousarray(array, dtype=dtypes[name])
             for name, array in columns.items()
         }
         self.count = counts.pop()
@@ -87,6 +88,14 @@ class PopulationStore:
     ) -> None:
         self._columns[name][self.district_slice(district_id)] += delta
         self._revision[district_id] += 1
+
+    def set_full_column(self, name: str, values: Array) -> None:
+        """Overwrite an entire column (bulk generation); dirties every district."""
+        if len(values) != self.count:
+            raise ValueError(f"column length {len(values)} != store size {self.count}")
+        self._columns[name][:] = values
+        for district_id in self._revision:
+            self._revision[district_id] += 1
 
     # -- revisions, dirty tracking, hashing --------------------------------
 

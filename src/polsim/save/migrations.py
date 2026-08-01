@@ -11,7 +11,7 @@ from __future__ import annotations
 import sqlite3
 from collections.abc import Callable, Mapping
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 Migration = Callable[[sqlite3.Connection], None]
 
@@ -28,7 +28,22 @@ def _reject_pre_world_save(conn: sqlite3.Connection) -> None:
     )
 
 
-MIGRATIONS: dict[int, Migration] = {1: _reject_pre_world_save}
+def _reject_pre_politics_save(conn: sqlite3.Connection) -> None:
+    """Schema 2 was the internal Milestone-2 format without political state.
+
+    Political attributes cannot be synthesized retroactively; compatibility
+    guarantees begin with the first playable release.
+    """
+    raise MigrationError(
+        "this save predates the political system (internal schema 2) and "
+        "cannot be upgraded; start a new game"
+    )
+
+
+MIGRATIONS: dict[int, Migration] = {
+    1: _reject_pre_world_save,
+    2: _reject_pre_politics_save,
+}
 
 
 class MigrationError(RuntimeError):

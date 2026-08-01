@@ -123,3 +123,11 @@ def test_pre_world_schema_rejected_clearly(sim: Simulation, tmp_path: Path) -> N
         conn.execute("UPDATE meta SET value = '1' WHERE key = 'schema_version'")
     with pytest.raises(SaveError, match="predates world generation"):
         load_game(path)
+
+
+def test_political_registries_round_trip(sim: Simulation, tmp_path: Path) -> None:
+    path = tmp_path / "politics.sqlite"
+    save_game(sim, path)
+    loaded = load_game(path)
+    assert loaded.politics.canonical_json() == sim.politics.canonical_json()
+    assert loaded.characters.to_json_list() == sim.characters.to_json_list()

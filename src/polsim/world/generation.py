@@ -25,11 +25,11 @@ from polsim.core.config import GameConfig, ScenarioConfig
 from polsim.core.ids import IdRegistry
 from polsim.core.rng import RngManager
 from polsim.people.columns import (
-    COLUMN_DTYPES,
     EDUCATION_LEVELS,
     EMPLOYMENT_STATUSES,
     HOUSING_TYPES,
     OCCUPATION_SECTORS,
+    column_dtypes,
 )
 from polsim.people.store import PopulationStore
 from polsim.world.geometry import MAP_HEIGHT, MAP_WIDTH, generate_district_shapes
@@ -181,7 +181,7 @@ def generate_world(
         for index in order[:overshoot]:
             citizens_per_district[index] -= 1
 
-    columns: dict[str, list[Array]] = {name: [] for name in COLUMN_DTYPES}
+    columns: dict[str, list[Array]] = {name: [] for name in column_dtypes()}
     district_ranges: dict[int, tuple[int, int]] = {}
     cursor = 0
     for position, did in enumerate(district_ids):
@@ -205,8 +205,11 @@ def generate_world(
         district_ranges[did] = (cursor, count)
         cursor += count
 
+    dtypes = column_dtypes()
     merged = {
-        name: np.concatenate(parts).astype(COLUMN_DTYPES[name])
+        name: np.concatenate(parts).astype(dtypes[name])
+        if parts
+        else np.zeros(cursor, dtype=dtypes[name])
         for name, parts in columns.items()
     }
     ids.allocate_block("citizen", cursor)

@@ -22,7 +22,10 @@ from polsim.core.ids import IdRegistry
 from polsim.core.rng import RngManager
 from polsim.core.seed import generate_world_seed
 from polsim.people.aggregates import PopulationAggregates
+from polsim.people.characters import CharacterRegistry
 from polsim.people.store import PopulationStore
+from polsim.politics.generation import generate_politics
+from polsim.politics.registry import PoliticalRegistry
 from polsim.world.generation import generate_world
 from polsim.world.model import World
 
@@ -41,6 +44,8 @@ class Simulation:
         population: PopulationStore,
         ids: IdRegistry,
         rng: RngManager,
+        characters: CharacterRegistry,
+        politics: PoliticalRegistry,
     ) -> None:
         self.game_config = game_config
         self.scenario = scenario
@@ -49,6 +54,8 @@ class Simulation:
         self.population = population
         self.ids = ids
         self.rng = rng
+        self.characters = characters
+        self.politics = politics
         self.clock = SimClock(start_date=scenario.start_date)
         self.aggregates = PopulationAggregates(population)
 
@@ -66,7 +73,13 @@ class Simulation:
         rng = RngManager(seed)
         ids = IdRegistry()
         world, population = generate_world(scenario_config, config, rng, ids)
-        sim = cls(config, scenario_config, seed, world, population, ids, rng)
+        characters = CharacterRegistry()
+        politics = generate_politics(
+            world, population, ids, characters, rng.stream("worldgen.politics")
+        )
+        sim = cls(
+            config, scenario_config, seed, world, population, ids, rng, characters, politics
+        )
         _LOG.info(
             "new game: scenario=%s seed=%d country=%s citizens=%d",
             scenario_config.scenario_id,
@@ -95,6 +108,8 @@ class Simulation:
             "district_ranges": {
                 str(k): list(v) for k, v in sorted(self.population.district_ranges().items())
             },
+            "characters": self.characters.to_json_list(),
+            "politics": self.politics.to_json_dict(),
         }
         canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(canonical.encode("utf-8")).hexdigest()

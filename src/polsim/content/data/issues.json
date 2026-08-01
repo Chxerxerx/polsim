@@ -1,0 +1,30 @@
+{
+  "axes": [
+    {"id": "economic", "negative_pole": "economic left", "positive_pole": "economic right"},
+    {"id": "authority", "negative_pole": "libertarian", "positive_pole": "authoritarian"},
+    {"id": "national", "negative_pole": "internationalist", "positive_pole": "nationalist"},
+    {"id": "social", "negative_pole": "progressive", "positive_pole": "traditionalist"},
+    {"id": "religion", "negative_pole": "secular", "positive_pole": "religious"},
+    {"id": "environment", "negative_pole": "industrialist", "positive_pole": "environmentalist"},
+    {"id": "military", "negative_pole": "pacifist", "positive_pole": "militarist"},
+    {"id": "state_structure", "negative_pole": "federalist", "positive_pole": "centralist"}
+  ],
+  "issues": [
+    {"id": "progressive_taxation", "name": "Progressive taxation", "area": "taxation", "axis_weights": {"economic": -0.9}},
+    {"id": "welfare_spending", "name": "Welfare spending", "area": "welfare", "axis_weights": {"economic": -0.85}},
+    {"id": "business_deregulation", "name": "Business deregulation", "area": "business", "axis_weights": {"economic": 0.85}},
+    {"id": "privatization", "name": "Privatization of state enterprises", "area": "economy", "axis_weights": {"economic": 0.8}},
+    {"id": "union_rights", "name": "Union rights", "area": "labor", "axis_weights": {"economic": -0.7, "authority": -0.2}},
+    {"id": "immigration_openness", "name": "Openness to immigration", "area": "immigration", "axis_weights": {"national": -0.85, "social": -0.3}},
+    {"id": "national_service", "name": "National service", "area": "defense", "axis_weights": {"military": 0.6, "national": 0.5}},
+    {"id": "military_spending", "name": "Military spending", "area": "defense", "axis_weights": {"military": 0.9}},
+    {"id": "police_powers", "name": "Police powers", "area": "policing", "axis_weights": {"authority": 0.85}},
+    {"id": "civil_liberties", "name": "Civil liberties protections", "area": "criminal_law", "axis_weights": {"authority": -0.9}},
+    {"id": "religious_schooling", "name": "Religious schooling", "area": "education", "axis_weights": {"religion": 0.85, "social": 0.3}},
+    {"id": "secular_state", "name": "Strict separation of religion and state", "area": "religion", "axis_weights": {"religion": -0.9}},
+    {"id": "carbon_limits", "name": "Carbon emission limits", "area": "climate", "axis_weights": {"environment": 0.9, "economic": -0.2}},
+    {"id": "industrial_expansion", "name": "Industrial expansion", "area": "energy", "axis_weights": {"environment": -0.85}},
+    {"id": "regional_autonomy", "name": "Regional autonomy", "area": "regional_government", "axis_weights": {"state_structure": -0.85}},
+    {"id": "traditional_family", "name": "Traditional family policy", "area": "family", "axis_weights": {"social": 0.9, "religion": 0.4}}
+  ]
+}

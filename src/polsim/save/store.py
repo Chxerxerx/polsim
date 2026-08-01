@@ -25,8 +25,10 @@ from polsim.core.config import GameConfig, ScenarioConfig
 from polsim.core.ids import IdRegistry
 from polsim.core.rng import RngManager
 from polsim.core.sim import Simulation
-from polsim.people.columns import COLUMN_DTYPES
+from polsim.people.characters import CharacterRegistry
+from polsim.people.columns import column_dtypes
 from polsim.people.store import PopulationStore
+from polsim.politics.registry import PoliticalRegistry
 from polsim.save.migrations import SCHEMA_VERSION, MigrationError, apply_migrations
 from polsim.world.model import World
 
@@ -43,6 +45,12 @@ _TABLES = """
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS rng_streams (name TEXT PRIMARY KEY, state TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS id_allocators (domain TEXT PRIMARY KEY, next_id INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS entities (
+    kind TEXT NOT NULL,
+    entity_id INTEGER NOT NULL,
+    data TEXT NOT NULL,
+    PRIMARY KEY (kind, entity_id)
+);
 CREATE TABLE IF NOT EXISTS population_chunks (
     district_id INTEGER NOT NULL,
     column TEXT NOT NULL,
@@ -85,6 +93,22 @@ def _write_meta(conn: sqlite3.Connection, sim: Simulation) -> None:
     conn.executemany("INSERT INTO rng_streams VALUES (?, ?)", sorted(sim.rng.snapshot().items()))
     conn.execute("DELETE FROM id_allocators")
     conn.executemany("INSERT INTO id_allocators VALUES (?, ?)", sorted(sim.ids.snapshot().items()))
+    conn.execute("DELETE FROM entities")
+    rows: list[tuple[str, int, str]] = []
+    for entry in sim.characters.to_json_list():
+        rows.append(("character", int(entry["character_id"]), json.dumps(entry, sort_keys=True)))
+    politics = sim.politics.to_json_dict()
+    for kind, plural, key in (
+        ("party", "parties", "party_id"),
+        ("branch", "branches", "branch_id"),
+        ("faction", "factions", "faction_id"),
+        ("organization", "organizations", "organization_id"),
+    ):
+        for entry in politics[plural]:
+            rows.append((kind, int(entry[key]), json.dumps(entry, sort_keys=True)))
+    for index, entry in enumerate(politics["endorsements"]):
+        rows.append(("endorsement", index, json.dumps(entry, sort_keys=True)))
+    conn.executemany("INSERT INTO entities VALUES (?, ?, ?)", rows)
 
 
 def _write_district_chunks(
@@ -93,14 +117,14 @@ def _write_district_chunks(
     compressor = zstandard.ZstdCompressor(level=_ZSTD_LEVEL)
     rows = []
     for district_id in district_ids:
-        for column in sorted(COLUMN_DTYPES):
+        for column in sorted(column_dtypes()):
             values = np.ascontiguousarray(store.district_column(district_id, column))
             blob = compressor.compress(values.tobytes())
             rows.append(
                 (
                     district_id,
                     column,
-                    COLUMN_DTYPES[column],
+                    column_dtypes()[column],
                     len(values),
                     hashlib.sha256(blob).hexdigest(),
                     blob,
@@ -151,15 +175,15 @@ def _load_population(
 ) -> PopulationStore:
     total = sum(length for _, length in district_ranges.values())
     columns: dict[str, Array] = {
-        name: np.empty(total, dtype=dtype) for name, dtype in COLUMN_DTYPES.items()
+        name: np.empty(total, dtype=dtype) for name, dtype in column_dtypes().items()
     }
     decompressor = zstandard.ZstdDecompressor()
-    filled: dict[str, int] = dict.fromkeys(COLUMN_DTYPES, 0)
+    filled: dict[str, int] = dict.fromkeys(column_dtypes(), 0)
     cursor = conn.execute(
         "SELECT district_id, column, dtype, count, checksum, data FROM population_chunks"
     )
     for district_id, column, dtype, count, checksum, blob in cursor:
-        if column not in COLUMN_DTYPES:
+        if column not in column_dtypes():
             raise SaveError(f"unknown population column in save: {column!r}")
         if hashlib.sha256(blob).hexdigest() != checksum:
             raise SaveError(f"population chunk corrupt (district {district_id}, {column})")
@@ -212,8 +236,34 @@ def load_game(path: Path) -> Simulation:
         ids.restore(
             {str(d): int(n) for d, n in conn.execute("SELECT domain, next_id FROM id_allocators")}
         )
+        entity_rows = conn.execute(
+            "SELECT kind, entity_id, data FROM entities ORDER BY kind, entity_id"
+        ).fetchall()
+        grouped: dict[str, list[dict[str, object]]] = {}
+        for kind, _, payload in entity_rows:
+            grouped.setdefault(str(kind), []).append(json.loads(payload))
+        characters = CharacterRegistry.from_json_list(
+            [dict(entry) for entry in grouped.get("character", [])]
+        )
+        politics = PoliticalRegistry.from_json_dict(
+            {
+                "parties": grouped.get("party", []),
+                "branches": grouped.get("branch", []),
+                "factions": grouped.get("faction", []),
+                "organizations": grouped.get("organization", []),
+                "endorsements": grouped.get("endorsement", []),
+            }
+        )
         sim = Simulation(
-            game_config, scenario, int(meta["world_seed"]), world, population, ids, rng
+            game_config,
+            scenario,
+            int(meta["world_seed"]),
+            world,
+            population,
+            ids,
+            rng,
+            characters,
+            politics,
         )
         sim.clock = SimClock.from_snapshot(json.loads(meta["clock"]))
         population.mark_saved(population.district_ids())

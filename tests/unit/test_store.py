@@ -6,12 +6,12 @@ import numpy as np
 import pytest
 from tests.conftest import small_sim
 
-from polsim.people.columns import COLUMN_DTYPES
+from polsim.people.columns import column_dtypes
 from polsim.people.store import PopulationStore
 
 
 def _tiny_columns(count: int) -> dict[str, np.ndarray]:
-    return {name: np.zeros(count, dtype=dtype) for name, dtype in COLUMN_DTYPES.items()}
+    return {name: np.zeros(count, dtype=dtype) for name, dtype in column_dtypes().items()}
 
 
 def test_store_validates_columns_and_ranges() -> None:

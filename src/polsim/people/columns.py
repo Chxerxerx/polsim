@@ -13,8 +13,12 @@ ranges here only fix their column dtypes.
 
 from __future__ import annotations
 
+from functools import cache
+
+from polsim.content.loader import load_axes, load_issues
+
 # (column name, numpy dtype string), fixed order.
-COLUMNS: tuple[tuple[str, str], ...] = (
+BASE_COLUMNS: tuple[tuple[str, str], ...] = (
     ("given_name", "int32"),  # index into World.given_names
     ("family_name", "int32"),  # index into World.family_names
     ("birth_week", "int32"),  # week offset from scenario start (negative = past)
@@ -44,7 +48,29 @@ COLUMNS: tuple[tuple[str, str], ...] = (
     ("population_weight", "int32"),
 )
 
-COLUMN_DTYPES: dict[str, str] = dict(COLUMNS)
+POLITICAL_COLUMNS: tuple[tuple[str, str], ...] = (
+    ("preferred_party", "int32"),  # 0 = none
+    ("party_member", "int32"),  # 0 = none, else party id
+    ("party_loyalty", "float32"),  # toward preferred party, 0..1
+    ("political_engagement", "float32"),  # 0..1
+    ("political_knowledge", "float32"),  # 0..1
+    ("institutional_trust", "float32"),  # 0..1
+    ("turnout_propensity", "float32"),  # 0..1
+    ("primary_organization", "int32"),  # 0 = none, else organization id
+)
+
+
+@cache
+def all_columns() -> tuple[tuple[str, str], ...]:
+    """Full column registry: base + political scalars + content axes/issues."""
+    axes = tuple((f"axis_{axis.axis_id}", "float32") for axis in load_axes())
+    issues = tuple((f"issue_{issue.issue_id}", "float32") for issue in load_issues())
+    return BASE_COLUMNS + POLITICAL_COLUMNS + axes + issues
+
+
+@cache
+def column_dtypes() -> dict[str, str]:
+    return dict(all_columns())
 
 SEXES: tuple[str, ...] = ("female", "male")
 GENDERS: tuple[str, ...] = ("woman", "man", "other")

@@ -32,6 +32,11 @@ def _scripted_week(sim: Simulation, week: int) -> None:
     touched = districts[week % len(districts)]
     sim.population.add_district_values(touched, "income", 0.25)
     sim.aggregates.weighted_mean("income")  # exercise the cache path
+    if week % 4 == 1:  # periodic internal party election (M3)
+        party_id = sorted(sim.politics.parties)[week % len(sim.politics.parties)]
+        sim.politics.elect_leader(
+            party_id, sim.population, sim.characters, sim.rng.stream("harness.election")
+        )
     sim.advance_week()
 
 

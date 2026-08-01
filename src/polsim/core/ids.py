@@ -33,6 +33,7 @@ KNOWN_DOMAINS: tuple[str, ...] = (
     "town",
     "event",
     "law",
+    "branch",
 )
 
 

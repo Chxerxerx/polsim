@@ -1,0 +1,14 @@
+{
+  "labels": [
+    {"id": "socialist", "name": "Socialist", "axes": {"economic": -0.85, "environment": 0.2}, "party_names": ["Workers' Party", "Socialist Party", "United Left"]},
+    {"id": "social_democrat", "name": "Social Democrat", "axes": {"economic": -0.5, "social": -0.3, "environment": 0.3}, "party_names": ["Social Democratic Party", "Labour Alliance"]},
+    {"id": "green", "name": "Green", "axes": {"environment": 0.9, "economic": -0.3, "social": -0.5, "national": -0.4}, "party_names": ["Green Alliance", "Ecological Party"]},
+    {"id": "liberal", "name": "Liberal", "axes": {"economic": 0.35, "authority": -0.6, "social": -0.5, "national": -0.4, "religion": -0.4}, "party_names": ["Liberal Forum", "Free Democrats", "Progress Party"]},
+    {"id": "centrist", "name": "Centrist", "axes": {}, "party_names": ["Citizens' Platform", "Centre Party"]},
+    {"id": "conservative", "name": "Conservative", "axes": {"economic": 0.5, "social": 0.5, "authority": 0.3, "national": 0.3}, "party_names": ["Conservative League", "National Assembly Party"]},
+    {"id": "religious_conservative", "name": "Religious Conservative", "axes": {"religion": 0.85, "social": 0.7, "economic": 0.2}, "party_names": ["Faith and Family Union", "Devotion Party"]},
+    {"id": "nationalist", "name": "Nationalist", "axes": {"national": 0.9, "authority": 0.5, "social": 0.5}, "party_names": ["National Union", "Homeland Front"]},
+    {"id": "libertarian", "name": "Libertarian", "axes": {"economic": 0.8, "authority": -0.9, "religion": -0.2}, "party_names": ["Liberty Party", "Free Market Alliance"]},
+    {"id": "regionalist", "name": "Regionalist", "axes": {"state_structure": -0.9, "national": 0.2}, "party_names": ["Provincial League", "Regions First"]}
+  ]
+}
