@@ -11,21 +11,28 @@ import argparse
 import cProfile
 import pstats
 
+from polsim.core.config import GameConfig
 from polsim.core.log import setup_logging
 from polsim.core.sim import Simulation
 
 
-def _run(weeks: int, seed: int) -> None:
-    sim = Simulation.new_game(world_seed=seed)
-    for _ in range(weeks):
+def _run(weeks: int, seed: int, citizens: int) -> None:
+    sim = Simulation.new_game(
+        game_config=GameConfig(simulated_citizen_target=citizens), world_seed=seed
+    )
+    districts = sim.population.district_ids()
+    for week in range(weeks):
         sim.rng.stream("profile.demo").integers(0, 1000, size=64)
+        sim.population.add_district_values(districts[week % len(districts)], "income", 0.01)
+        sim.aggregates.weighted_mean("income")
         sim.advance_week()
     sim.state_hash()
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--weeks", type=int, default=500)
+    parser.add_argument("--weeks", type=int, default=100)
+    parser.add_argument("--citizens", type=int, default=250_000)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--top", type=int, default=25)
     args = parser.parse_args()
@@ -33,7 +40,7 @@ def main() -> None:
     setup_logging("WARNING")
     profiler = cProfile.Profile()
     profiler.enable()
-    _run(args.weeks, args.seed)
+    _run(args.weeks, args.seed, args.citizens)
     profiler.disable()
     stats = pstats.Stats(profiler)
     stats.sort_stats(pstats.SortKey.CUMULATIVE).print_stats(args.top)

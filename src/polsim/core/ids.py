@@ -49,6 +49,16 @@ class IdRegistry:
         self._next[domain] = allocated + 1
         return allocated
 
+    def allocate_block(self, domain: str, count: int) -> int:
+        """Allocate ``count`` consecutive identifiers; returns the first."""
+        if domain not in self._next:
+            raise ValueError(f"unknown id domain: {domain!r}")
+        if count < 0:
+            raise ValueError("count must be non-negative")
+        start = self._next[domain]
+        self._next[domain] = start + count
+        return start
+
     def snapshot(self) -> dict[str, int]:
         return dict(self._next)
 

@@ -11,11 +11,24 @@ from __future__ import annotations
 import sqlite3
 from collections.abc import Callable, Mapping
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 Migration = Callable[[sqlite3.Connection], None]
 
-MIGRATIONS: dict[int, Migration] = {}
+def _reject_pre_world_save(conn: sqlite3.Connection) -> None:
+    """Schema 1 was the internal Milestone-1 format with no world data.
+
+    A world cannot be synthesized retroactively, and no compatibility was
+    promised for pre-playable internal schemas; compatibility guarantees
+    begin with the first playable release.
+    """
+    raise MigrationError(
+        "this save predates world generation (internal schema 1) and cannot "
+        "be upgraded; start a new game"
+    )
+
+
+MIGRATIONS: dict[int, Migration] = {1: _reject_pre_world_save}
 
 
 class MigrationError(RuntimeError):

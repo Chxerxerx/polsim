@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "polsim"
-version = "0.1.0"
+version = "0.2.0"
 description = "Political simulation and grand-strategy game (working title)"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -42,3 +42,4 @@ files = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+pythonpath = ["."]
