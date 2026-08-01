@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 from tests.conftest import small_sim
 
 from polsim.people.columns import EMPLOYMENT_STATUSES
@@ -91,3 +92,24 @@ def test_demographics_are_sane() -> None:
     # Name indices stay inside the pools.
     assert int(store.column("given_name").max()) < len(sim.world.given_names)
     assert int(store.column("family_name").max()) < len(sim.world.family_names)
+
+
+def test_district_shapes_partition_the_map() -> None:
+    sim = small_sim()
+    world = sim.world
+    assert set(world.district_shapes) == set(world.district_ids())
+    assert world.map_width > 0 and world.map_height > 0
+    total_area = 0.0
+    for shape in world.district_shapes.values():
+        xs = [point[0] for point in shape]
+        ys = [point[1] for point in shape]
+        assert min(xs) >= 0.0 and max(xs) <= world.map_width
+        assert min(ys) >= 0.0 and max(ys) <= world.map_height
+        # shoelace area of the quadrilateral
+        area = 0.0
+        for index in range(len(shape)):
+            x1, y1 = shape[index]
+            x2, y2 = shape[(index + 1) % len(shape)]
+            area += x1 * y2 - x2 * y1
+        total_area += abs(area) / 2.0
+    assert total_area == pytest.approx(world.map_width * world.map_height, rel=1e-9)

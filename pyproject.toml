@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "polsim"
-version = "0.2.0"
+version = "0.2.5"
 description = "Political simulation and grand-strategy game (working title)"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-ui = ["PySide6>=6.11"]
+ui = ["PySide6>=6.11", "pytest-qt>=4.4"]
 dev = [
     "ruff>=0.8",
     "mypy>=1.14",
@@ -22,6 +22,9 @@ dev = [
     "hypothesis>=6.120",
     "pytest-benchmark>=5.1",
 ]
+
+[project.scripts]
+polsim-ui = "polsim.ui.app:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/polsim"]
@@ -33,6 +36,9 @@ src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/polsim/ui/*" = ["N802"]  # Qt overrides (closeEvent, resizeEvent, ...)
 
 [tool.mypy]
 python_version = "3.13"

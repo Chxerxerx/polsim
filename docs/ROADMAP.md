@@ -1,6 +1,6 @@
 # Roadmap (living document — source of truth for milestone status)
 
-Last updated: 2026-08-01 (session: Milestone 2 delivery).
+Last updated: 2026-08-01 (session: Milestone 2.5 delivery).
 
 ## Decision log
 
@@ -30,7 +30,7 @@ Linux-tested, docs + this roadmap updated, no known critical defects).
 | M0 | Architecture & technical decisions: design docs, ADRs, data model, determinism/performance/testing strategies, package scaffold, CI, this roadmap | **Complete** (2026-08-01). Note: the initial GitHub web upload dropped hidden files (.gitignore, CI workflow) and added __pycache__; repaired in a housekeeping commit. CI activates on the first `git push`. |
 | M1 | Core foundation: weekly clock, deterministic RNG streams, entity IDs, game/scenario config, seed generation, basic save/load, logging, test + profiling infrastructure, replay harness | **Complete** (2026-08-01): all M1 systems implemented; 61 tests passing incl. replay harness (same-seed and save/load-mid-run hash equality) and save round-trips; randomness guard test active; ruff + mypy --strict clean; verified on Linux/CPython 3.14.4. M1 baselines (sandbox hardware): advance_week ~1 µs, state_hash ~70 µs, save ~5.5 ms, load ~0.5 ms. **Complete** (2026-08-01, CI green on ac768b9). |
 | M2 | Geography & population: country/provinces/districts/towns, generation, SoA store, weights, demographics, aggregates, event-driven updates. **Hard gate: 250k storage/update/save/load within budget** | **Complete** (2026-08-01, CI green on 72bae2f). All M2 systems implemented; 83 tests passing; ruff + mypy --strict clean; Linux/CPython 3.14.4. **Gate PASSED** at 250,000 citizens (sandbox hardware, mean): worldgen 0.36 s (budget 60 s), full save 0.14 s (5 s), incremental save 14 ms (1 s), load 34 ms (10 s), state hash 13 ms, synthetic full-population weekly update 0.5 ms (weekly budget 0.5 s), aggregate recompute 0.9 ms; peak RSS 100 MB (budget 2.5 GB). Population weights conserved exactly (10,000,000 represented). |
-| M2.5 | UI walking skeleton (post-ADR-001): PySide6 shell, worker-thread boundary, map spike, one live view-model | Not started |
+| M2.5 | UI walking skeleton (post-ADR-001): PySide6 shell, worker-thread boundary, map spike, one live view-model | **Delivered for review** (2026-08-01). MainWindow shell (toolbar, district dock, status bar), SimulationWorker on a QThread via queued signals with immutable Qt-free snapshot view-models, QGraphicsView choropleth map (population / mean income / urban share modes, hover, click-select) over deterministic weighted-BSP district geometry (exact map partition, provinces contiguous), save/load through the UI path, `polsim-ui` entry point. 88 tests passing incl. an offscreen end-to-end UI smoke (new game → advance → save → advance → load → select district → mode switch); CI now installs the ui extra and runs offscreen. Manual smoke performed via offscreen render + screenshot review. Complete when pushed and CI is green. |
 | M3 | Ideology, parties, factions, organizations | Not started |
 | M4 | Electoral-law framework: five systems, deterministic allocation, golden-fixture + property tests | Not started |
 | M5 | Citizen voting & polling. **Hard gate: full-electorate voting pass within election budget** | Not started |

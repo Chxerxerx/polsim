@@ -8,4 +8,4 @@ compressed per-district chunks and incremental saves. No gameplay yet; see
 docs/ROADMAP.md.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.2.5"

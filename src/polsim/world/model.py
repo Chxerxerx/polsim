@@ -48,6 +48,9 @@ class World:
     languages: list[str] = field(default_factory=list)
     given_names: list[str] = field(default_factory=list)
     family_names: list[str] = field(default_factory=list)
+    map_width: float = 0.0
+    map_height: float = 0.0
+    district_shapes: dict[int, list[tuple[float, float]]] = field(default_factory=dict)
 
     def district_ids(self) -> list[int]:
         return [district.district_id for district in self.districts]
@@ -64,6 +67,12 @@ class World:
             "languages": self.languages,
             "given_names": self.given_names,
             "family_names": self.family_names,
+            "map_width": self.map_width,
+            "map_height": self.map_height,
+            "district_shapes": {
+                str(district_id): [list(point) for point in shape]
+                for district_id, shape in sorted(self.district_shapes.items())
+            },
         }
 
     @classmethod
@@ -79,4 +88,10 @@ class World:
             languages=list(data["languages"]),
             given_names=list(data["given_names"]),
             family_names=list(data["family_names"]),
+            map_width=float(data.get("map_width", 0.0)),
+            map_height=float(data.get("map_height", 0.0)),
+            district_shapes={
+                int(district_id): [(float(x), float(y)) for x, y in shape]
+                for district_id, shape in data.get("district_shapes", {}).items()
+            },
         )

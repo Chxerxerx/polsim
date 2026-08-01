@@ -32,6 +32,7 @@ from polsim.people.columns import (
     OCCUPATION_SECTORS,
 )
 from polsim.people.store import PopulationStore
+from polsim.world.geometry import MAP_HEIGHT, MAP_WIDTH, generate_district_shapes
 from polsim.world.model import District, Province, Town, World
 from polsim.world.names import (
     generate_label_names,
@@ -160,6 +161,15 @@ def generate_world(
         scenario.represented_population,
         np.asarray(structure_rng.lognormal(0.0, 0.5, size=districts)),
     )
+    world.map_width = MAP_WIDTH
+    world.map_height = MAP_HEIGHT
+    world.district_shapes = generate_district_shapes(
+        district_ids,
+        district_province,
+        [int(value) for value in district_pop],
+        rng.stream("worldgen.geometry"),
+    )
+
     citizens_per_district = _largest_remainder(
         game_config.simulated_citizen_target, district_pop.astype(np.float64)
     )
